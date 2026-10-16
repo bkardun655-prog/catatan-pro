@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catatan Pro</title>
+<link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Catatan%20Pro%22,%22short_name%22:%22Catatan%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22667eea%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20192%20192'%3E%3Crect%20fill='%23667eea'%20width='192'%20height='192'%20rx='40'/%3E%3Ctext%20x='96'%20y='130'%20font-size='110'%20text-anchor='middle'%3E📝%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
+<meta name="theme-color" content="#667eea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  :root {
+    --bg: #f8fafc;
+    --bg2: #ffffff;
+    --card: #ffffff;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --input-bg: #f1f5f9;
+    --primary: #667eea;
+    --primary-dark: #4c5fd5;
+    --shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 10px 40px rgba(15, 23, 42, 0.15);
+    --danger: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --radius: 18px;
+    --radius-sm: 12px;
+  }
+
+  body.dark {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --input-bg: #0f172a;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  body.accent-rose { --primary: #f43f5e; --primary-dark: #e11d48; }
+  body.accent-emerald { --primary: #10b981; --primary-dark: #059669; }
+  body.accent-amber { --primary: #f59e0b; --primary-dark: #d97706; }
+  body.accent-violet { --primary: #a855f7; --primary-dark: #9333ea; }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    padding-bottom: 100px;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    background: var(--card);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    background: var(--input-bg);
+    color: var(--text);
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .icon-btn:active {
+    transform: scale(0.9);
+  }
+
+  .icon-btn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* Search */
+  .search-box {
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 2px solid transparent;
+    background: var(--input-bg);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .search-box input:focus {
+    border-color: var(--primary);
+    background: var(--card);
+  }
+
+  .search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* Kategori Filter */
+  .kategori-filter {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 0 4px;
+    scrollbar-width: none;
+  }
+
+  .kategori-filter::-webkit-scrollbar { display: none; }
+
+  .kat-chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .kat-chip.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .kat-chip .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ===== Container ===== */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* ===== Stats ===== */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .stat-card .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .stat-card .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  /* ===== Note Grid ===== */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .note-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    position: relative;
+    border-left: 4px solid var(--primary);
+    overflow: hidden;
+    break-inside: avoid;
+  }
+
+  .note-card:active {
+    transform: scale(0.97);
+  }
+
+  .note-card.pinned {
+    background: linear-gradient(135deg, var(--card) 0%, rgba(102, 126, 234, 0.05) 100%);
+  }
+
+  .note-card.favorite::after {
+    content: '⭐';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 14px;
+  }
+
+  .note-kat {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+
+  .note-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .note-preview {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin-bottom: 10px;
+  }
+
+  .note-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .pin-badge {
+    color: var(--primary);
+    font-size: 12px;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .emoji {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .empty-state p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ===== FAB ===== */
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    transition: transform 0.2s;
+  }
+
+  .fab:active {
+    transform: scale(0.9) rotate(90deg);
+  }
+
+  /* ===== Editor Modal ===== */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s;
+  }
+
+  .modal.active {
+    display: flex;
+    transform: translateY(0);
+  }
+
+  .editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .editor-header button {
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+  }
+
+  .editor-header .save-btn {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .editor-header .icon-action {
+    font-size: 18px;
+    padding: 8px;
+  }
+
+  .editor-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .editor-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 700;
+    outline: none;
+    padding: 8px 0;
+    margin-bottom: 8px;
+  }
+
+  .editor-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  .editor-textarea {
+    width: 100%;
+    min-height: 250px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    outline: none;
+    padding: 8px 0;
+    resize: none;
+    font-family: inherit;
+  }
+
+  .editor-textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  .editor-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .editor-meta button {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .editor-meta button.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .editor-img-preview {
+    position: relative;
+    margin: 12px 0;
+    display: none;
+  }
+
+  .editor-img-preview img {
+    width: 100%;
+    max-height: 250px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+  }
+
+  .editor-img-preview .remove-img {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  /* Kategori Picker */
+  .kat-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .kat-option {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kat-option.active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* ===== Detail Modal ===== */
+  .detail-modal {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .detail-modal.active {
+    display: flex;
+  }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .detail-header .back-btn {
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  .detail-header .actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .detail-header .actions button {
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 10px;
+  }
+
+  .detail-body {
+    padding: 20px;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .detail-kat {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    color: #fff;
+  }
+
+  .detail-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  .detail-img {
+    width: 100%;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+
+  .detail-content {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .detail-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* ===== Menu Modal (Backup) ===== */
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .sheet-overlay.active {
+    display: flex;
+  }
+
+  .sheet {
+    background: var(--card);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 720px;
+    padding: 20px;
+    padding-bottom: 30px;
+    animation: slideUp 0.3s;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .sheet h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .sheet-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: background 0.2s;
+  }
+
+  .sheet-item:hover {
+    background: var(--input-bg);
+  }
+
+  .sheet-item .sheet-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--input-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .sheet-item .sheet-text {
+    flex: 1;
+  }
+
+  .sheet-item .sheet-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .sheet-item .sheet-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .accent-picker {
+    display: flex;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .accent-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .accent-dot.active {
+    border-color: var(--text);
+    transform: scale(1.15);
+  }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 2000;
+    transition: transform 0.3s;
+    white-space: nowrap;
+    max-width: 90vw;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== Voice Recording ===== */
+  .voice-btn.recording {
+    background: var(--danger) !important;
+    color: #fff !important;
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Responsive */
+  @media (max-width: 400px) {
+    .notes-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .note-card {
+      padding: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon">📝</div>
+      <span>Catatan Pro</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnDark" onclick="toggleDark()">🌙</button>
+      <button class="icon-btn" onclick="openSheet()">☰</button>
+    </div>
+  </div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Cari catatan..." oninput="renderNotes()">
+  </div>
+  <div class="kategori-filter" id="kategoriFilter"></div>
+</header>
+
+<!-- ===== Container ===== -->
+<div class="container">
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num" id="statTotal">0</div>
+      <div class="lbl">TOTAL</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="statPin">0</div>
+      <div class="lbl">DISEMATKAN</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="statFav">0</div>
+      <div class="lbl">FAVORIT</div>
+    </div>
+  </div>
+
+  <div class="notes-grid" id="notesGrid"></div>
+</div>
+
+<!-- ===== FAB ===== -->
+<button class="fab" onclick="openEditor()">+</button>
+
+<!-- ===== Editor Modal ===== -->
+<div class="modal" id="editorModal">
+  <div class="editor-header">
+    <button onclick="closeEditor()">Batal</button>
+    <div style="display:flex;gap:4px;align-items:center">
+      <button class="icon-action" id="btnFav" onclick="toggleFav()" title="Favorit">☆</button>
+      <button class="icon-action" id="btnPin" onclick="togglePin()" title="Sematkan">📌</button>
+      <button class="save-btn" onclick="saveNote()">Simpan</button>
+    </div>
+  </div>
+  <div class="editor-body">
+    <input type="text" class="editor-input" id="editTitle" placeholder="Judul catatan..." maxlength="100">
+    <textarea class="editor-textarea" id="editContent" placeholder="Tulis isi catatan di sini..."></textarea>
+
+    <div class="editor-img-preview" id="imgPreview">
+      <img id="imgPreviewSrc" src="" alt="Preview">
+      <button class="remove-img" onclick="removeImage()">✕</button>
+    </div>
+
+    <div class="editor-meta">
+      <button onclick="document.getElementById('imgInput').click()">🖼️ Gambar</button>
+      <button id="btnVoice" class="voice-btn" onclick="toggleVoice()">🎤 Suara</button>
+      <button onclick="clearFormat()">🧹 Bersihkan</button>
+    </div>
+
+    <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(event)">
+
+    <div style="margin-top:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px">KATEGORI</div>
+      <div class="kat-picker" id="katPicker"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Detail Modal ===== -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <div class="actions">
+      <button id="detailFav" onclick="detailToggleFav()">☆</button>
+      <button onclick="detailEdit()">✏️</button>
+      <button onclick="detailDelete()">🗑️</button>
+    </div>
+  </div>
+  <div class="detail-body">
+    <div class="detail-kat" id="detailKat">UMUM</div>
+    <div class="detail-title" id="detailTitle"></div>
+    <img class="detail-img" id="detailImg" style="display:none" alt="Gambar">
+    <div class="detail-content" id="detailContent"></div>
+    <div class="detail-footer">
+      <div>📅 Dibuat: <span id="detailCreated"></span></div>
+      <div>✏️ Diubah: <span id="detailEdited"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Sheet Menu ===== -->
+<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet(event)">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <h3>Menu</h3>
+
+    <div class="sheet-item" onclick="exportNotes()">
+      <div class="sheet-icon">📤</div>
+      <div class="sheet-text">
+        <div class="sheet-title">Export Data</div>
+        <div class="sheet-desc">Simpan semua catatan ke file JSON</div>
+      </div>
+    </div>
+
+    <div class="sheet-item" onclick="document.getElementById('importInput').click()">
+      <div class="sheet-icon">📥</div>
+      <div class="sheet-text">
+        <div class="sheet-title">Import Data</div>
+        <div class="sheet-desc">Pulihkan catatan dari file backup</div>
+      </div>
+    </div>
+
+    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importNotes(event)">
+
+    <div class="sheet-item" style="cursor:default">
+      <div class="sheet-icon">🎨</div>
+      <div class="sheet-text">
+        <div class="sheet-title">Warna Aksen</div>
+        <div class="sheet-desc">Pilih tema warna aplikasi</div>
+      </div>
+    </div>
+
+    <div class="accent-picker">
+      <div class="accent-dot" data-accent="default" style="background:#667eea" onclick="setAccent('default')"></div>
+      <div class="accent-dot" data-accent="rose" style="background:#f43f5e" onclick="setAccent('rose')"></div>
+      <div class="accent-dot" data-accent="emerald" style="background:#10b981" onclick="setAccent('emerald')"></div>
+      <div class="accent-dot" data-accent="amber" style="background:#f59e0b" onclick="setAccent('amber')"></div>
+      <div class="accent-dot" data-accent="violet" style="background:#a855f7" onclick="setAccent('violet')"></div>
+    </div>
+
+    <div class="sheet-item" onclick="hapusSemua()" style="margin-top:12px">
+      <div class="sheet-icon" style="background:#fee2e2">🗑️</div>
+      <div class="sheet-text">
+        <div class="sheet-title" style="color:var(--danger)">Hapus Semua</div>
+        <div class="sheet-desc">Hapus seluruh catatan (tidak bisa dibatalkan)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Konstanta =====
+const KATEGORI = [
+  { id: 'umum',      name: 'Umum',      color: '#64748b' },
+  { id: 'kerja',     name: 'Kerja',     color: '#3b82f6' },
+  { id: 'pribadi',   name: 'Pribadi',   color: '#ec4899' },
+  { id: 'ide',       name: 'Ide',       color: '#f59e0b' },
+  { id: 'belanja',   name: 'Belanja',   color: '#10b981' },
+  { id: 'penting',   name: 'Penting',   color: '#ef4444' }
+];
+
+// ===== State =====
+let notes = JSON.parse(localStorage.getItem('catatanProData')) || [];
+let currentEditId = null;
+let currentDetailId = null;
+let selectedKategori = 'umum';
+let currentImage = null;
+let activeKatFilter = 'all';
+let recognition = null;
+let isRecording = false;
+
+// ===== Storage =====
+function saveNotes() {
+  localStorage.setItem('catatanProData', JSON.stringify(notes));
+}
+
+// ===== Format Tanggal =====
+function formatDate(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 1000;
+
+  if (diff < 60) return 'Baru saja';
+  if (diff < 3600) return Math.floor(diff / 60) + ' menit lalu';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' jam lalu';
+  if (diff < 604800) return Math.floor(diff / 86400) + ' hari lalu';
+
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatFullDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('id-ID', {
+    day: '2-digit', month: 'long', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+// ===== Escape HTML =====
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text || '';
+  return div.innerHTML;
+}
+
+// ===== Get Kategori Info =====
+function getKat(id) {
+  return KATEGORI.find(k => k.id === id) || KATEGORI[0];
+}
+
+// ===== Render Kategori Filter =====
+function renderKategoriFilter() {
+  const container = document.getElementById('kategoriFilter');
+  const allActive = activeKatFilter === 'all' ? 'active' : '';
+  let html = `<button class="kat-chip ${allActive}" onclick="setKatFilter('all')">Semua</button>`;
+
+  KATEGORI.forEach(k => {
+    const count = notes.filter(n => n.kategori === k.id).length;
+    if (count === 0) return;
+    const active = activeKatFilter === k.id ? 'active' : '';
+    html += `<button class="kat-chip ${active}" onclick="setKatFilter('${k.id}')">
+      <span class="dot" style="background:${k.color}"></span>${k.name} (${count})
+    </button>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function setKatFilter(id) {
+  activeKatFilter = id;
+  renderKategoriFilter();
+  renderNotes();
+}
+
+// ===== Render Notes =====
+function renderNotes() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  const grid = document.getElementById('notesGrid');
+
+  let filtered = notes.filter(n => {
+    const matchSearch = !search ||
+      n.title.toLowerCase().includes(search) ||
+      n.content.toLowerCase().includes(search);
+    const matchKat = activeKatFilter === 'all' || n.kategori === activeKatFilter;
+    return matchSearch && matchKat;
+  });
+
+  // Urut: pinned dulu, lalu tanggal terbaru
+  filtered.sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.editedAt || b.createdAt) - new Date(a.editedAt || a.createdAt);
+  });
+
+  // Stats
+  document.getElementById('statTotal').textContent = notes.length;
+  document.getElementById('statPin').textContent = notes.filter(n => n.pinned).length;
+  document.getElementById('statFav').textContent = notes.filter(n => n.favorite).length;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="emoji">${search ? '🔍' : '📝'}</div>
+        <h3>${search ? 'Tidak ditemukan' : 'Belum ada catatan'}</h3>
+        <p>${search ? 'Coba kata kunci lain' : 'Tap tombol + untuk mulai menulis'}</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(n => {
+    const kat = getKat(n.kategori);
+    const classes = ['note-card'];
+    if (n.pinned) classes.push('pinned');
+    if (n.favorite) classes.push('favorite');
+
+    const styleBorder = `border-left-color: ${kat.color};`;
+    const stylePinned = n.pinned ? `background: linear-gradient(135deg, var(--card) 0%, ${kat.color}10 100%);` : '';
+
+    return `
+      <div class="${classes.join(' ')}" style="${styleBorder}${stylePinned}" onclick="openDetail('${n.id}')">
+        <div class="note-kat" style="color:${kat.color}">${kat.name}${n.pinned ? ' 📌' : ''}</div>
+        ${n.image ? `<img class="note-img" src="${n.image}" alt="">` : ''}
+        <div class="note-title">${escapeHtml(n.title || 'Tanpa judul')}</div>
+        <div class="note-preview">${escapeHtml(n.content || 'Tidak ada isi')}</div>
+        <div class="note-footer">
+          <span>${formatDate(n.editedAt || n.createdAt)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== Editor =====
+function openEditor(id = null) {
+  currentEditId = id;
+  currentImage = null;
+  selectedKategori = 'umum';
+
+  const titleEl = document.getElementById('editTitle');
+  const contentEl = document.getElementById('editContent');
+  const imgPreview = document.getElementById('imgPreview');
+
+  if (id) {
+    const note = notes.find(n => n.id === id);
+    if (note) {
+      titleEl.value = note.title;
+      contentEl.value = note.content;
+      selectedKategori = note.kategori || 'umum';
+      currentImage = note.image || null;
+
+      if (currentImage) {
+        document.getElementById('imgPreviewSrc').src = currentImage;
+        imgPreview.style.display = 'block';
+      } else {
+        imgPreview.style.display = 'none';
+      }
+
+      document.getElementById('btnFav').textContent = note.favorite ? '⭐' : '☆';
+      document.getElementById('btnFav').classList.toggle('active', note.favorite);
+      document.getElementById('btnPin').classList.toggle('active', note.pinned);
+      document.getElementById('btnPin').style.opacity = note.pinned ? '1' : '0.5';
+    }
+  } else {
+    titleEl.value = '';
+    contentEl.value = '';
+    imgPreview.style.display = 'none';
+    document.getElementById('btnFav').textContent = '☆';
+    document.getElementById('btnFav').classList.remove('active');
+    document.getElementById('btnPin').classList.remove('active');
+    document.getElementById('btnPin').style.opacity = '0.5';
+  }
+
+  renderKatPicker();
+  document.getElementById('editorModal').classList.add('active');
+  setTimeout(() => titleEl.focus(), 300);
+}
+
+function closeEditor() {
+  document.getElementById('editorModal').classList.remove('active');
+  stopVoice();
+}
+
+function renderKatPicker() {
+  const picker = document.getElementById('katPicker');
+  picker.innerHTML = KATEGORI.map(k => `
+    <button class="kat-option ${selectedKategori === k.id ? 'active' : ''}"
+            onclick="selectKat('${k.id}')">
+      <span style="width:8px;height:8px;border-radius:50%;background:${k.color};display:inline-block"></span>
+      ${k.name}
+    </button>
+  `).join('');
+}
+
+function selectKat(id) {
+  selectedKategori = id;
+  renderKatPicker();
+}
+
+// ===== Toggle Fav / Pin =====
+function toggleFav() {
+  if (!currentEditId) {
+    // Untuk catatan baru, simpan status sementara via data attribute
+    const btn = document.getElementById('btnFav');
+    btn.textContent = btn.textContent === '☆' ? '⭐' : '☆';
+    btn.classList.toggle('active');
+    return;
+  }
+  const note = notes.find(n => n.id === currentEditId);
+  if (note) {
+    note.favorite = !note.favorite;
+    document.getElementById('btnFav').textContent = note.favorite ? '⭐' : '☆';
+    document.getElementById('btnFav').classList.toggle('active', note.favorite);
+  }
+}
+
+function togglePin() {
+  if (!currentEditId) {
+    const btn = document.getElementById('btnPin');
+    btn.classList.toggle('active');
+    btn.style.opacity = btn.classList.contains('active') ? '1' : '0.5';
+    return;
+  }
+  const note = notes.find(n => n.id === currentEditId);
+  if (note) {
+    note.pinned = !note.pinned;
+    document.getElementById('btnPin').classList.toggle('active', note.pinned);
+    document.getElementById('btnPin').style.opacity = note.pinned ? '1' : '0.5';
+  }
+}
+
+// ===== Handle Image =====
+function handleImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    return showToast('Gambar maksimal 2MB');
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentImage = e.target.result;
+    document.getElementById('imgPreviewSrc').src = currentImage;
+    document.getElementById('imgPreview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  currentImage = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgInput').value = '';
+}
+
+function clearFormat() {
+  if (!confirm('Kosongkan judul dan isi catatan?')) return;
+  document.getElementById('editTitle').value = '';
+  document.getElementById('editContent').value = '';
+}
+
+// ===== Voice Input =====
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    return showToast('Browser tidak mendukung input suara');
+  }
+
+  if (isRecording) {
+    stopVoice();
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'id-ID';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = (event) => {
+    let finalTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      }
+    }
+    if (finalTranscript) {
+      const el = document.getElementById('editContent');
+      el.value += (el.value ? ' ' : '') + finalTranscript.trim();
+    }
+  };
+
+  recognition.onerror = () => {
+    stopVoice();
+    showToast('Gagal merekam suara');
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    document.getElementById('btnVoice').classList.remove('recording');
+    document.getElementById('btnVoice').textContent = '🎤 Suara';
+  };
+
+  recognition.start();
+  isRecording = true;
+  document.getElementById('btnVoice').classList.add('recording');
+  document.getElementById('btnVoice').textContent = '⏹ Stop';
+  showToast('🎤 Mendengarkan...');
+}
+
+function stopVoice() {
+  if (recognition && isRecording) {
+    recognition.stop();
+    isRecording = false;
+    const btn = document.getElementById('btnVoice');
+    if (btn) {
+      btn.classList.remove('recording');
+      btn.textContent = '🎤 Suara';
+    }
+  }
+}
+
+// ===== Save Note =====
+function saveNote() {
+  const title = document.getElementById('editTitle').value.trim();
+  const content = document.getElementById('editContent').value.trim();
+
+  if (!title && !content && !currentImage) {
+    return showToast('Catatan masih kosong');
+  }
+
+  const now = new Date().toISOString();
+
+  if (currentEditId) {
+    const note = notes.find(n => n.id === currentEditId);
+    if (note) {
+      note.title = title || 'Tanpa judul';
+      note.content = content;
+      note.kategori = selectedKategori;
+      note.image = currentImage;
+      note.editedAt = now;
+    }
+    showToast('✅ Catatan diperbarui');
+  } else {
+    notes.unshift({
+      id: Date.now().toString(),
+      title: title || 'Tanpa judul',
+      content: content,
+      kategori: selectedKategori,
+      image: currentImage,
+      pinned: document.getElementById('btnPin').classList.contains('active'),
+      favorite: document.getElementById('btnFav').classList.contains('active'),
+      createdAt: now,
+      editedAt: now
+    });
+    showToast('✅ Catatan disimpan');
+  }
+
+  saveNotes();
+  renderNotes();
+  renderKategoriFilter();
+  closeEditor();
+}
+
+// ===== Detail Modal =====
+function openDetail(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+
+  currentDetailId = id;
+  const kat = getKat(note.kategori);
+
+  document.getElementById('detailKat').textContent = kat.name;
+  document.getElementById('detailKat').style.background = kat.color;
+  document.getElementById('detailTitle').textContent = note.title;
+
+  const img = document.getElementById('detailImg');
+  if (note.image) {
+    img.src = note.image;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+
+  document.getElementById('detailContent').textContent = note.content || '(Tidak ada isi)';
+  document.getElementById('detailCreated').textContent = formatFullDate(note.createdAt);
+  document.getElementById('detailEdited').textContent = formatFullDate(note.editedAt || note.createdAt);
+  document.getElementById('detailFav').textContent = note.favorite ? '⭐' : '☆';
+
+  document.getElementById('detailModal').classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('active');
+  currentDetailId = null;
+}
+
+function detailEdit() {
+  const id = currentDetailId;
+  closeDetail();
+  setTimeout(() => openEditor(id), 200);
+}
+
+function detailDelete() {
+  if (!confirm('Hapus catatan ini?')) return;
+  notes = notes.filter(n => n.id !== currentDetailId);
+  saveNotes();
+  renderNotes();
+  renderKategoriFilter();
+  closeDetail();
+  showToast('🗑️ Catatan dihapus');
+}
+
+function detailToggleFav() {
+  const note = notes.find(n => n.id === currentDetailId);
+  if (note) {
+    note.favorite = !note.favorite;
+    document.getElementById('detailFav').textContent = note.favorite ? '⭐' : '☆';
+    saveNotes();
+    renderNotes();
+  }
+}
+
+// ===== Sheet Menu =====
+function openSheet() {
+  document.getElementById('sheetOverlay').classList.add('active');
+  updateAccentPicker();
+}
+
+function closeSheet(e) {
+  if (e && e.target !== document.getElementById('sheetOverlay')) return;
+  document.getElementById('sheetOverlay').classList.remove('active');
+}
+
+// ===== Accent =====
+function setAccent(accent) {
+  document.body.className = document.body.className
+    .split(' ')
+    .filter(c => !c.startsWith('accent-'))
+    .join(' ');
+
+  if (accent !== 'default') {
+    document.body.classList.add('accent-' + accent);
+  }
+  localStorage.setItem('catatanProAccent', accent);
+  updateAccentPicker();
+  showToast('🎨 Warna diubah');
+}
+
+function updateAccentPicker() {
+  const current = localStorage.getItem('catatanProAccent') || 'default';
+  document.querySelectorAll('.accent-dot').forEach(el => {
+    el.classList.toggle('active', el.dataset.accent === current);
+  });
+}
+
+// ===== Dark Mode =====
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  localStorage.setItem('catatanProDark', isDark);
+  document.getElementById('btnDark').textContent = isDark ? '☀️' : '🌙';
+}
+
+// ===== Export / Import =====
+function exportNotes() {
+  if (notes.length === 0) return showToast('Belum ada catatan untuk di-export');
+
+  const data = {
+    app: 'Catatan Pro',
+    version: 1,
+    exportDate: new Date().toISOString(),
+    notes: notes
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `catatan-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  showToast('📤 Backup berhasil diunduh');
+  closeSheet({ target: document.getElementById('sheetOverlay') });
+}
+
+function importNotes(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.notes || !Array.isArray(data.notes)) throw new Error('Format tidak valid');
+
+      if (!confirm(`Import ${data.notes.length} catatan? Catatan saat ini akan digabung.`)) return;
+
+      // Gabung, hindari duplikat by id
+      const existingIds = new Set(notes.map(n => n.id));
+      const newNotes = data.notes.filter(n => !existingIds.has(n.id));
+      notes = [...newNotes, ...notes];
+      saveNotes();
+      renderNotes();
+      renderKategoriFilter();
+      showToast(`✅ ${newNotes.length} catatan diimport`);
+      closeSheet({ target: document.getElementById('sheetOverlay') });
+    } catch (err) {
+      showToast('❌ File tidak valid');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function hapusSemua() {
+  if (notes.length === 0) return showToast('Belum ada catatan');
+  if (!confirm('⚠️ Hapus SEMUA catatan? Tindakan ini tidak bisa dibatalkan!')) return;
+  if (!confirm('Yakin? Semua catatan akan hilang permanen.')) return;
+  notes = [];
+  saveNotes();
+  renderNotes();
+  renderKategoriFilter();
+  closeSheet({ target: document.getElementById('sheetOverlay') });
+  showToast('🗑️ Semua catatan dihapus');
+}
+
+// ===== Toast =====
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== Init =====
+(function init() {
+  // Dark mode
+  if (localStorage.getItem('catatanProDark') === 'true') {
+    document.body.classList.add('dark');
+    document.getElementById('btnDark').textContent = '☀️';
+  }
+
+  // Accent
+  const accent = localStorage.getItem('catatanProAccent') || 'default';
+  if (accent !== 'default') {
+    document.body.classList.add('accent-' + accent);
+  }
+
+  renderKategoriFilter();
+  renderNotes();
+})();
+</script>
+</body>
+</html>
